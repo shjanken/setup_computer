@@ -79,3 +79,12 @@ def setup_my_computer():
     init_vim_spf13()
     install_oracle_jdk()
     install_flash_plugin()
+
+    print(green('install completed. now init dotfiles'))
+    print(green('-------------------------------'))
+
+    print(green('add alias to ~/.zshrc'))
+    local('echo alias gst="git status" >> ~/.zshrc')
+    local('echo alias gitc="git commit -am " >> ~/.zshrc')
+    local('echo alias fsl="$HOME/workspace/fsl-client/python/fsl.py --url http://10.0.0.210:3010 --action changeyw" >> ~/.zshrc')
+
