@@ -14,9 +14,18 @@ softwares = ['git',
              'curl',]
 
 def install_software():
+    local('sudo apt-get update')
     local('sudo apt-get install -y %s' % ' '.join(softwares))
     local('git config --global user.email janken.wang@hotmail.com')
     local('git config --global user.name shjanken')
+
+    #input method
+    with settings(hide('stderr'), warn_only=True):
+        isGnome = local('gnome-shell --version')
+        if isGnome.failed and confirm('Is the desktop enviroment Gnome?'):
+            local('sudo apt-get install ibus-rime')
+        else:
+            local('sudo apt-get install fcitx-rime')
 
 def create_workspace():
     dir = '~/workspace'
