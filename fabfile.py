@@ -1,4 +1,4 @@
-from fabric.api import *
+from fabric.api import local,settings,hide
 from fabric.contrib.console import confirm
 from fabric.colors import green, red
 
@@ -11,7 +11,8 @@ softwares = ['git',
              'uget',
              'zsh',
              'fish',
-             'curl',]
+             'curl',
+             'autojump',]
 
 def install_software():
     local('sudo apt-get update')
@@ -28,12 +29,13 @@ def install_software():
             local('sudo apt-get install fcitx-rime')
 
 def create_workspace():
-    dir = '~/workspace'
+    #dir = '~/workspace'
     with settings(hide('stderr'), warn_only=True):
         ls_result = local('ls ~/workspace/')
         if ls_result.failed:
             local('mkdir ~/workspace')
             print(green('workspace directory was created!'))
+
 
 def git_pull():
 #    local('git clone https://git.coding.net/shjanken/mydotfile.git ~/workspace/mydotfile')
@@ -44,15 +46,27 @@ def git_pull():
     local('git clone https://github.com/shjanken/vimperator_backup.git ~/.vimperator')
 
 def init_oh_my_zsh():
-    local('sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"')
+    ##local('sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"')
+    ## manual instal
+    local('rm -rf ~/.zshrc')
+    local('rm -rf ~/.oh-my-zsh/')
+
+    local('git clone git://github.com/robbyrussell/oh-my-zsh.git ~/.oh-my-zsh')
+    local('cp ~/.oh-my-zsh/templates/zshrc.zsh-template ~/.zshrc')
+
+    print(green('add alias to ~/.zshrc'))
+    local("echo alias gst=\"git status\" >> ~/.zshrc")
+    local("echo alias gitc=\"git commit -am \" >> ~/.zshrc")
+    local("echo alias fsl=\"python $HOME/workspace/fsl-client/python/fsl.py --url http://10.0.0.210:3010 --action changeyw\" >> ~/.zshrc")
 
 def init_spacemacs():
-    ls_result = local('ls ~/.emacs.d')
-    if ls_result.failed:
-        local('git clone https://github.com/syl20bnr/spacemacs ~/.emacs.d')
-    else:
-        local('mv ~/.emacs.d ~/.emacs.d.bak')
-        local('git clone https://github.com/syl20bnr/spacemacs ~/.emacs.d')
+    with settings(hide('stderr'),warn_only=True):
+      ls_result = local('ls ~/.emacs.d')
+      if ls_result.failed:
+          local('git clone https://github.com/syl20bnr/spacemacs ~/.emacs.d')
+      else:
+          local('mv ~/.emacs.d ~/.emacs.d.bak')
+          local('git clone https://github.com/syl20bnr/spacemacs ~/.emacs.d')
 
 def init_vim_spf13():
     local('curl https://j.mp/spf13-vim3 -L > spf13-vim.sh && sh spf13-vim.sh')
@@ -60,11 +74,11 @@ def init_vim_spf13():
 def install_oracle_jdk():
     local('sudo add-apt-repository ppa:webupd8team/java')
     local('sudo apt-get update')
-    local('sudo apt-get install oracle-jdk8-installer')
+    local('sudo apt-get install oracle-java8-installer')
 
 
 def install_flash_plugin():
-    local('sudo apt-get install falshplugin-installer')
+    local('sudo apt-get install flashplugin-installer')
 
 def setup_my_computer():
     install_software()
@@ -77,14 +91,11 @@ def setup_my_computer():
     init_oh_my_zsh()
     init_spacemacs()
     init_vim_spf13()
-    install_oracle_jdk()
-    install_flash_plugin()
 
-    print(green('install completed. now init dotfiles'))
+    print(green('install completed.'))
     print(green('-------------------------------'))
 
-    print(green('add alias to ~/.zshrc'))
-    local('echo alias gst="git status" >> ~/.zshrc')
-    local('echo alias gitc="git commit -am " >> ~/.zshrc')
-    local('echo alias fsl="$HOME/workspace/fsl-client/python/fsl.py --url http://10.0.0.210:3010 --action changeyw" >> ~/.zshrc')
-
+    print(red('long time install'))
+    if confirm('install oracle java and flashplugin?'):
+        install_oracle_jdk()
+        install_flash_plugin()
