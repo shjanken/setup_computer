@@ -1,3 +1,4 @@
+# -*- coding:utf-8 -*-
 from fabric.api import local,settings,hide
 from fabric.contrib.console import confirm
 from fabric.colors import green, red
@@ -15,6 +16,8 @@ softwares = ['git',
              'autojump',]
 
 def install_software():
+    print(green("install softwares"))
+
     local('sudo apt-get update')
     local('sudo apt-get install -y %s' % ' '.join(softwares))
     local('git config --global user.email janken.wang@hotmail.com')
@@ -29,9 +32,9 @@ def install_software():
         #     local('sudo apt-get install fcitx-rime')
         # 测试如果 gnome-shell 存在， 则表明是gnome环境，安装ibus
         if isGnome.failed:
-            local('sudo apt-get install fcitx-rime')
+            local('sudo apt-get install fcitx-rime -y')
         else:
-            local('sudo apt-get install ibus-rime')
+            local('sudo apt-get install ibus-rime -y')
 
 
 def __create_workspace():
@@ -43,23 +46,26 @@ def __create_workspace():
             print(green('workspace directory was created!'))
 
 
-def git_pull():
+def git_pull_from_codingnet():
 #    local('git clone https://git.coding.net/shjanken/mydotfile.git ~/workspace/mydotfile')
 #    local('git clone https://git.coding.net/shjanken/fsl-client.git ~/workspace/fsl-client')
 #    local('git clone https://git.coding.net/shjanken/CrimanalIntent.git ~/workspace/CrimanalIntent')
     ## 在 clone 之前应该测试下是否上传了 ssh-key-gen
-    git_result = local('ssh -Tv git@git.coding.net')
-    if git_result:
-        local('git clone git@git.coding.net:shjanken/mydotfile.git ~/workspace/mydotfile/')
-        local('git clone git@git.coding.net:shjanken/fsl-client.git ~/workspace/fsl-client/')
-        local('git clone https://github.com/shjanken/vimperator_backup.git ~/.vimperator')
-    else:
-        red('请先配置 coding.net 的 ssh key. 完成之后重试')
+    print(green("pull my project from coding.net"))
+    with settings(warn_only=True):
+        git_result = local('ssh -Tv git@git.coding.net')
+        if git_result.failed:
+            red('plz setup codingnet first !')
+        else:
+            local('git clone git@git.coding.net:shjanken/mydotfile.git ~/workspace/mydotfile/')
+            local('git clone git@git.coding.net:shjanken/fsl-client.git ~/workspace/fsl-client/')
+            local('git clone https://github.com/shjanken/vimperator_backup.git ~/.vimperator')
 
 
 def init_oh_my_zsh():
     ##local('sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"')
     ## manual instal
+    print(red('clean old zsh enviroment'))
     local('rm -rf ~/.zshrc')
     local('rm -rf ~/.oh-my-zsh/')
 
@@ -72,7 +78,8 @@ def init_oh_my_zsh():
     local("echo alias fsl=\"python $HOME/workspace/fsl-client/python/fsl.py --url http://10.0.0.210:3010 --action changeyw\" >> ~/.zshrc")
 
 def init_spacemacs():
-    with settings(hide('stderr'),warn_only=True):
+    print(green('setup spacemacs'))
+    with settings(warn_only=True):
       ls_result = local('ls ~/.emacs.d')
       if ls_result.failed:
           local('git clone https://github.com/syl20bnr/spacemacs ~/.emacs.d')
@@ -81,6 +88,7 @@ def init_spacemacs():
           local('git clone https://github.com/syl20bnr/spacemacs ~/.emacs.d')
 
 def init_vim_spf13():
+    print(green('install spf13-vim'))
     local('curl https://j.mp/spf13-vim3 -L > spf13-vim.sh && sh spf13-vim.sh')
 
 def install_oracle_jdk():
@@ -96,10 +104,8 @@ def setup_my_computer():
     install_software()
     __create_workspace()
 
-    print(green('pull my projects-------'))
-    git_pull()
+    git_pull_from_codingnet()
 
-    print(green('pull other dotfiles'))
     init_oh_my_zsh()
     init_spacemacs()
     init_vim_spf13()
