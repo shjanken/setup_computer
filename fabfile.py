@@ -23,12 +23,18 @@ def install_software():
     #input method
     with settings(hide('stderr'), warn_only=True):
         isGnome = local('gnome-shell --version')
-        if isGnome.failed and confirm('Is the desktop enviroment Gnome?'):
-            local('sudo apt-get install ibus-rime')
-        else:
+        # if isGnome.failed and confirm('Is the desktop enviroment Gnome?'):
+        #     local('sudo apt-get install ibus-rime')
+        # else:
+        #     local('sudo apt-get install fcitx-rime')
+        # 测试如果 gnome-shell 存在， 则表明是gnome环境，安装ibus
+        if isGnome.failed:
             local('sudo apt-get install fcitx-rime')
+        else:
+            local('sudo apt-get install ibus-rime')
 
-def create_workspace():
+
+def __create_workspace():
     #dir = '~/workspace'
     with settings(hide('stderr'), warn_only=True):
         ls_result = local('ls ~/workspace/')
@@ -41,9 +47,15 @@ def git_pull():
 #    local('git clone https://git.coding.net/shjanken/mydotfile.git ~/workspace/mydotfile')
 #    local('git clone https://git.coding.net/shjanken/fsl-client.git ~/workspace/fsl-client')
 #    local('git clone https://git.coding.net/shjanken/CrimanalIntent.git ~/workspace/CrimanalIntent')
-    local('git clone git@git.coding.net:shjanken/mydotfile.git ~/workspace/mydotfile/')
-    local('git clone git@git.coding.net:shjanken/fsl-client.git ~/workspace/fsl-client/')
-    local('git clone https://github.com/shjanken/vimperator_backup.git ~/.vimperator')
+    ## 在 clone 之前应该测试下是否上传了 ssh-key-gen
+    git_result = local('ssh -Tv git@git.coding.net')
+    if git_result:
+        local('git clone git@git.coding.net:shjanken/mydotfile.git ~/workspace/mydotfile/')
+        local('git clone git@git.coding.net:shjanken/fsl-client.git ~/workspace/fsl-client/')
+        local('git clone https://github.com/shjanken/vimperator_backup.git ~/.vimperator')
+    else:
+        red('请先配置 coding.net 的 ssh key. 完成之后重试')
+
 
 def init_oh_my_zsh():
     ##local('sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"')
@@ -82,7 +94,7 @@ def install_flash_plugin():
 
 def setup_my_computer():
     install_software()
-    create_workspace()
+    __create_workspace()
 
     print(green('pull my projects-------'))
     git_pull()
