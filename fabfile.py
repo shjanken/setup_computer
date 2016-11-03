@@ -74,9 +74,9 @@ def init_oh_my_zsh():
     local('cp ~/.oh-my-zsh/templates/zshrc.zsh-template ~/.zshrc')
 
     print(green('add alias to ~/.zshrc'))
-    local('echo alias gst=\"git status\" >> ~/.zshrc')
-    local('echo alias gitc=\"git commit -am \" >> ~/.zshrc')
-    local('echo alias fsl=\"python $HOME/workspace/fsl-client/python/fsl.py --url http://10.0.0.210:3010 --action changeyw\" >> ~/.zshrc')
+    local('''echo "alias gst=\"git status\"" >> ~/.zshrc''')
+    local('''echo "alias gitc=\"git commit -am \"" >> ~/.zshrc''')
+    local('''echo "alias fsl=\"python $HOME/workspace/fsl-client/python/fsl.py --url http://10.0.0.210:3010 --action changeyw\"" >> ~/.zshrc''')
 
 def init_spacemacs():
     print(green('setup spacemacs'))
